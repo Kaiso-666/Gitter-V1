@@ -51,6 +51,8 @@ Usage:
   gitter newrepo [owner/]repo [--private|--public]
   gitter enable
   gitter up [commit-message]
+  gitter list
+  gitter delete <owner/repo>
 EOF2
   exit 1
 }
@@ -155,6 +157,25 @@ up(){
   fi
 }
 
+list(){
+  if ! command -v gh >/dev/null 2>&1; then
+    echo "gh CLI not found, install it first."
+    exit 1
+  fi
+  gh repo list --limit 100
+}
+
+delete(){
+  repo="$1"
+  [ -z "$repo" ] && { echo "specify repo to delete: owner/repo"; exit 1; }
+  if ! command -v gh >/dev/null 2>&1; then
+    echo "gh CLI not found, install it first."
+    exit 1
+  fi
+  gh repo delete "$repo" --confirm
+  echo "Deleted repo: $repo"
+}
+
 [ $# -lt 1 ] && usage
 cmd="$1"; shift
 case "$cmd" in
@@ -162,6 +183,8 @@ case "$cmd" in
   newrepo) newrepo "$@";;
   enable) enable "$@";;
   up) up "$@";;
+  list) list "$@";;
+  delete) delete "$@";;
   -h|--help|help) usage;;
   *) usage;;
 esac
